@@ -6,61 +6,96 @@
 <title>QUIZ MMA — Deportes de Contacto y Artes Marciales</title>
 <style>
   :root{
-    --bg:#0f1420; --card:#1a2234; --ink:#f2f5fb; --muted:#9aa7bd;
+    --bg1:#0a0e17; --bg2:#141b2e; --card:rgba(26,34,52,.72); --ink:#f2f5fb; --muted:#9aa7bd;
     --accent:#ff5a3c; --accent2:#ffb03a; --ok:#2fbf71; --bad:#e23b4e;
-    --line:#2a3550;
+    --line:rgba(255,255,255,.08);
   }
   *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
   body{
     font-family:system-ui,"Segoe UI",Roboto,sans-serif;
-    background:radial-gradient(1200px 600px at 50% -10%,#1d2740,var(--bg));
     color:var(--ink); min-height:100vh; display:flex; align-items:center;
-    justify-content:center; padding:20px;
+    justify-content:center; padding:20px; overflow-x:hidden;
+    background:
+      radial-gradient(900px 500px at 15% -10%, rgba(255,90,60,.22), transparent 60%),
+      radial-gradient(800px 500px at 90% 110%, rgba(255,176,58,.18), transparent 55%),
+      linear-gradient(160deg,var(--bg1),var(--bg2));
   }
-  .app{width:100%; max-width:640px}
+  /* Partículas / destellos de fondo */
+  .glow{position:fixed; border-radius:50%; filter:blur(60px); opacity:.5; z-index:0; pointer-events:none}
+  .glow.a{width:360px;height:360px;background:#ff5a3c;top:-120px;left:-80px;animation:float1 14s ease-in-out infinite}
+  .glow.b{width:420px;height:420px;background:#ffb03a;bottom:-160px;right:-120px;animation:float2 18s ease-in-out infinite}
+  @keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,30px)}}
+  @keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-30px,-40px)}}
+  @media (prefers-reduced-motion:reduce){ .glow{animation:none} .btn,.opt{transition:none} }
+
+  .app{width:100%; max-width:660px; position:relative; z-index:1}
   .card{
-    background:var(--card); border:1px solid var(--line); border-radius:18px;
-    padding:28px; box-shadow:0 20px 50px rgba(0,0,0,.45);
+    background:var(--card); border:1px solid var(--line); border-radius:22px;
+    padding:30px; box-shadow:0 25px 60px rgba(0,0,0,.5);
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
   }
-  .logo{font-size:44px; text-align:center}
-  h1{text-align:center; font-size:30px; margin:8px 0 4px; letter-spacing:1px}
-  .sub{text-align:center; color:var(--muted); margin-bottom:22px; font-size:15px}
+  .logo{font-size:48px; text-align:center; filter:drop-shadow(0 4px 12px rgba(255,90,60,.5))}
+  h1{
+    text-align:center; font-size:34px; margin:6px 0 4px; letter-spacing:2px; font-weight:900;
+    background:linear-gradient(135deg,#fff,var(--accent2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .sub{text-align:center; color:var(--muted); margin-bottom:24px; font-size:15px; line-height:1.5}
   .btn{
-    width:100%; border:none; border-radius:12px; padding:15px;
-    font-size:17px; font-weight:700; cursor:pointer; color:#fff;
+    width:100%; border:none; border-radius:14px; padding:16px;
+    font-size:17px; font-weight:800; letter-spacing:.5px; cursor:pointer; color:#fff;
     background:linear-gradient(135deg,var(--accent),var(--accent2));
-    transition:transform .08s ease, filter .15s ease;
+    box-shadow:0 8px 24px rgba(255,90,60,.35);
+    transition:transform .08s ease, filter .15s ease, box-shadow .15s ease;
   }
-  .btn:hover{filter:brightness(1.08)}
+  .btn:hover{filter:brightness(1.08); box-shadow:0 10px 30px rgba(255,90,60,.5)}
   .btn:active{transform:scale(.98)}
   .topbar{display:flex; justify-content:space-between; align-items:center;
-    color:var(--muted); font-size:14px; margin-bottom:14px}
-  .bar{height:8px; background:var(--line); border-radius:99px; overflow:hidden; margin-bottom:22px}
+    color:var(--muted); font-size:14px; margin-bottom:12px}
+  .scoreLbl{font-weight:700; color:var(--ink)}
+  .bar{height:9px; background:rgba(255,255,255,.08); border-radius:99px; overflow:hidden; margin-bottom:22px}
   .bar > i{display:block; height:100%; width:0;
-    background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .3s ease}
-  .q{font-size:20px; font-weight:700; line-height:1.4; margin-bottom:20px}
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    box-shadow:0 0 12px rgba(255,176,58,.6); transition:width .35s ease}
+  .tag{display:inline-block; font-size:11px; font-weight:800; letter-spacing:1px;
+    padding:4px 12px; border-radius:99px; margin-bottom:14px; text-transform:uppercase}
+  .tag.easy{background:rgba(47,191,113,.16); color:var(--ok); border:1px solid rgba(47,191,113,.4)}
+  .tag.hard{background:rgba(226,59,78,.16); color:var(--bad); border:1px solid rgba(226,59,78,.4)}
+  .tag.photo{background:rgba(255,176,58,.16); color:var(--accent2); border:1px solid rgba(255,176,58,.4)}
+  .fighter{
+    display:flex; flex-direction:column; align-items:center; gap:12px;
+    background:rgba(10,14,23,.6); border:1px solid var(--line); border-radius:16px;
+    padding:20px; margin-bottom:18px;
+  }
+  .fighter img, .fighter svg{width:160px; height:160px; border-radius:14px; object-fit:cover}
+  .clue{color:var(--muted); font-size:14px; text-align:center; line-height:1.55}
+  .q{font-size:21px; font-weight:800; line-height:1.4; margin-bottom:22px}
   .opts{display:grid; gap:12px}
   .opt{
-    text-align:left; background:#121a2b; border:1px solid var(--line);
-    color:var(--ink); padding:15px 16px; border-radius:12px; font-size:16px;
-    cursor:pointer; transition:border-color .15s, background .15s;
+    text-align:left; background:rgba(10,14,23,.55); border:1px solid var(--line);
+    color:var(--ink); padding:15px 16px; border-radius:13px; font-size:16px;
+    cursor:pointer; transition:border-color .15s, background .15s, transform .08s;
   }
-  .opt:hover{border-color:var(--accent2)}
-  .opt:disabled{cursor:default}
-  .opt.ok{background:rgba(47,191,113,.18); border-color:var(--ok)}
-  .opt.bad{background:rgba(226,59,78,.18); border-color:var(--bad)}
-  .feedback{min-height:24px; margin-top:16px; font-weight:600}
+  .opt:hover{border-color:var(--accent2); transform:translateX(3px)}
+  .opt:disabled{cursor:default; transform:none}
+  .opt.ok{background:rgba(47,191,113,.2); border-color:var(--ok)}
+  .opt.bad{background:rgba(226,59,78,.2); border-color:var(--bad)}
+  .feedback{min-height:24px; margin-top:16px; font-weight:700}
   .feedback.ok{color:var(--ok)}
   .feedback.bad{color:var(--bad)}
   .next{margin-top:18px; display:none}
-  .score-num{font-size:52px; text-align:center; font-weight:800;
+  .score-num{font-size:60px; text-align:center; font-weight:900;
     background:linear-gradient(135deg,var(--accent),var(--accent2));
     -webkit-background-clip:text; background-clip:text; color:transparent}
-  .score-msg{text-align:center; color:var(--muted); margin:6px 0 22px; font-size:16px}
+  .score-msg{text-align:center; color:var(--muted); margin:6px 0 24px; font-size:16px}
   .hidden{display:none}
 </style>
 </head>
 <body>
+<div class="glow a"></div>
+<div class="glow b"></div>
+
 <div class="app">
   <div class="card">
 
@@ -68,17 +103,19 @@
     <section id="start">
       <div class="logo">🥊🥋</div>
       <h1>QUIZ MMA</h1>
-      <p class="sub">Deportes de contacto y artes marciales. Preguntas al azar cada partida.</p>
+      <p class="sub">Deportes de contacto y artes marciales.<br>Preguntas al azar cada partida: fáciles, difíciles y de "adivina el peleador".</p>
       <button class="btn" onclick="startGame()">Empezar</button>
     </section>
 
     <!-- JUEGO -->
     <section id="game" class="hidden">
       <div class="topbar">
-        <span id="counter">Pregunta 1 / 12</span>
-        <span id="scoreLbl">Aciertos: 0</span>
+        <span id="counter">Pregunta 1 / 14</span>
+        <span class="scoreLbl" id="scoreLbl">Aciertos: 0</span>
       </div>
       <div class="bar"><i id="progress"></i></div>
+      <span class="tag" id="levelTag"></span>
+      <div id="media"></div>
       <div class="q" id="question"></div>
       <div class="opts" id="options"></div>
       <div class="feedback" id="feedback"></div>
@@ -88,7 +125,7 @@
     <!-- FINAL -->
     <section id="end" class="hidden">
       <div class="logo">🏆</div>
-      <div class="score-num" id="finalScore">0 / 12</div>
+      <div class="score-num" id="finalScore">0 / 14</div>
       <p class="score-msg" id="finalMsg"></p>
       <button class="btn" onclick="startGame()">Jugar otra vez</button>
     </section>
@@ -97,59 +134,152 @@
 </div>
 
 <script>
-// Banco completo de preguntas. Cada partida coge QUESTIONS_PER_GAME al azar.
+/* ============================================================
+   SILUETA DE PELEADOR (SVG genérico, sin derechos de autor).
+   Para preguntas de imagen. Si quieres fotos reales, pon el
+   archivo en img/<nombre>.jpg y en la pregunta usa
+   photo:"img/<nombre>.jpg" en vez de silhouette:true.
+   ============================================================ */
+function fighterSVG(){
+  return `
+  <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Silueta de peleador">
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ff5a3c"/><stop offset="1" stop-color="#ffb03a"/>
+      </linearGradient>
+    </defs>
+    <rect width="120" height="120" rx="12" fill="#0a0e17"/>
+    <circle cx="60" cy="38" r="18" fill="url(#g)"/>
+    <path d="M30 108 C30 78 42 66 60 66 C78 66 90 78 90 108 Z" fill="url(#g)"/>
+    <rect x="22" y="80" width="18" height="18" rx="9" fill="#e23b4e"/>
+    <rect x="80" y="80" width="18" height="18" rx="9" fill="#e23b4e"/>
+  </svg>`;
+}
+
+/* ============================================================
+   BANCO DE PREGUNTAS  (type: easy | hard | photo)
+   ============================================================ */
 const BANK = [
-  { q:"¿En qué arte marcial se usa la cinta (obi) de colores para marcar el nivel?",
+  // ---------- FÁCILES ----------
+  { type:"easy", q:"¿En qué arte marcial se usa la cinta (obi) de colores para marcar el nivel?",
     o:["Boxeo","Judo","Esgrima","Lucha libre"], a:1 },
-  { q:"¿Cuántos asaltos tiene por defecto un combate de título en el boxeo profesional moderno?",
+  { type:"easy", q:"¿Cuántos asaltos tiene por defecto un combate de título en el boxeo profesional moderno?",
     o:["5","10","12","15"], a:2 },
-  { q:"El Muay Thai es el arte de los '¿cuántos miembros?'",
+  { type:"easy", q:"El Muay Thai es el arte de los '¿cuántos miembros?'",
     o:["Dos","Cuatro","Seis","Ocho"], a:3 },
-  { q:"¿De qué país es originario el Taekwondo?",
+  { type:"easy", q:"¿De qué país es originario el Taekwondo?",
     o:["Japón","China","Corea","Tailandia"], a:2 },
-  { q:"En MMA, ¿qué significan las siglas UFC?",
+  { type:"easy", q:"En MMA, ¿qué significan las siglas UFC?",
     o:["Ultimate Fighting Championship","United Fight Club","Universal Fight Contest","Ultra Fighter Cup"], a:0 },
-  { q:"El Brazilian Jiu-Jitsu se centra sobre todo en...",
+  { type:"easy", q:"El Brazilian Jiu-Jitsu se centra sobre todo en...",
     o:["Patadas altas","Lucha en el suelo y sumisiones","Golpes de puño","Armas"], a:1 },
-  { q:"¿Qué prenda protege los nudillos y la muñeca en el boxeo?",
+  { type:"easy", q:"¿Qué prenda protege los nudillos y la muñeca en el boxeo?",
     o:["Espinillera","Guante","Casco","Peto"], a:1 },
-  { q:"El judo fue creado por...",
+  { type:"easy", q:"El judo fue creado por...",
     o:["Bruce Lee","Jigoro Kano","Helio Gracie","Morihei Ueshiba"], a:1 },
-  { q:"En lucha olímpica, ¿cómo se gana por 'tocado de espaldas'?",
-    o:["Por puntos","Por descalificación","Por pin (hombros al suelo)","Por rendición"], a:2 },
-  { q:"El Karate se originó en...",
-    o:["Okinawa (Japón)","Brasil","Grecia","Mongolia"], a:0 },
-  { q:"¿Cómo se llama la jaula octogonal donde combate la UFC?",
+  { type:"easy", q:"¿Cómo se llama la jaula octogonal donde combate la UFC?",
     o:["El ring","El tatami","El octágono","La lona"], a:2 },
-  { q:"Una 'llave de brazo' que hiperextiende el codo se llama...",
-    o:["Armbar","Kimura","Guillotina","Triángulo"], a:0 },
-  { q:"¿Qué significa 'K.O.'?",
+  { type:"easy", q:"¿Qué significa 'K.O.'?",
     o:["Knock Out","Keep On","Kick Only","Key Off"], a:0 },
-  { q:"El Aikido es un arte marcial de origen...",
-    o:["Coreano","Chino","Japonés","Vietnamita"], a:2 },
-  { q:"¿Qué estilo es famoso por las patadas giratorias y saltadas?",
-    o:["Judo","Taekwondo","Sumo","Boxeo"], a:1 },
-  { q:"El 'mataleón' (rear naked choke) es una...",
-    o:["Patada","Proyección","Estrangulación","Esquiva"], a:2 },
-  { q:"¿Cuántos jueces puntúan normalmente un combate de boxeo?",
-    o:["1","2","3","5"], a:2 },
-  { q:"El Sambo es un arte marcial de origen...",
-    o:["Ruso","Brasileño","Filipino","Griego"], a:0 },
-  { q:"En MMA, 'ground and pound' significa...",
-    o:["Golpear de pie","Derribar y golpear en el suelo","Correr por el ring","Bloquear patadas"], a:1 },
-  { q:"El cinturón más alto habitual en muchas artes marciales es el...",
-    o:["Blanco","Amarillo","Verde","Negro"], a:3 },
-  { q:"¿Qué peso es más ligero en el boxeo?",
-    o:["Peso pesado","Peso mosca","Peso medio","Peso wélter"], a:1 },
-  { q:"El Krav Magá es un sistema de defensa de origen...",
-    o:["Israelí","Japonés","Tailandés","Mexicano"], a:0 },
-  { q:"La 'guardia' en Jiu-Jitsu es una posición en la que luchas...",
-    o:["De pie","Desde la espalda controlando con las piernas","Corriendo","Sentado en la esquina"], a:1 },
-  { q:"¿Qué golpe de puño es un gancho corto y circular?",
+  { type:"easy", q:"El Karate se originó en...",
+    o:["Okinawa (Japón)","Brasil","Grecia","Mongolia"], a:0 },
+  { type:"easy", q:"¿Qué golpe de puño es un gancho corto y circular?",
     o:["Jab","Directo","Hook (gancho)","Uppercut"], a:2 },
+  { type:"easy", q:"El 'mataleón' (rear naked choke) es una...",
+    o:["Patada","Proyección","Estrangulación","Esquiva"], a:2 },
+  { type:"easy", q:"El Krav Magá es un sistema de defensa de origen...",
+    o:["Israelí","Japonés","Tailandés","Mexicano"], a:0 },
+  { type:"easy", q:"¿Qué estilo es famoso por las patadas giratorias y saltadas?",
+    o:["Judo","Taekwondo","Sumo","Boxeo"], a:1 },
+  { type:"easy", q:"El Sambo es un arte marcial de origen...",
+    o:["Ruso","Brasileño","Filipino","Griego"], a:0 },
+  { type:"easy", q:"¿Cuántos jueces puntúan normalmente un combate de boxeo?",
+    o:["1","2","3","5"], a:2 },
+  { type:"easy", q:"El Aikido es un arte marcial de origen...",
+    o:["Coreano","Chino","Japonés","Vietnamita"], a:2 },
+  { type:"easy", q:"En MMA, 'ground and pound' significa...",
+    o:["Golpear de pie","Derribar y golpear en el suelo","Correr por el ring","Bloquear patadas"], a:1 },
+  { type:"easy", q:"¿Qué peso es más ligero en el boxeo?",
+    o:["Peso pesado","Peso mosca","Peso medio","Peso wélter"], a:1 },
+  { type:"easy", q:"El Capoeira, mezcla de arte marcial y danza, es de origen...",
+    o:["Brasileño","Cubano","Portugués","Angoleño-brasileño"], a:3 },
+  { type:"easy", q:"El Kickboxing combina boxeo con...",
+    o:["Lucha de suelo","Patadas","Armas","Proyecciones"], a:1 },
+  { type:"easy", q:"¿Qué golpe se lanza con el puño de forma recta y rápida para medir distancia?",
+    o:["Jab","Uppercut","Gancho","Codazo"], a:0 },
+  { type:"easy", q:"El 'tatami' es la superficie típica de...",
+    o:["Boxeo","Judo y karate","Esgrima","Natación"], a:1 },
+
+  // ---------- DIFÍCILES ----------
+  { type:"hard", q:"¿Quién fue el primer campeón de peso wélter de la historia de la UFC?",
+    o:["Matt Hughes","Pat Miletich","Carlos Newton","Georges St-Pierre"], a:1 },
+  { type:"hard", q:"En el sistema '10 puntos', ¿qué puntuación recibe quien gana claramente un asalto sin derribos ni cortes?",
+    o:["10-8","10-9","10-10","9-10"], a:1 },
+  { type:"hard", q:"¿Qué campeón de la UFC es conocido como 'The Last Stylebender'?",
+    o:["Israel Adesanya","Kamaru Usman","Jon Jones","Alex Pereira"], a:0 },
+  { type:"hard", q:"La 'guillotina' es una estrangulación que se aplica...",
+    o:["Desde la espalda","Rodeando el cuello por delante","Con las piernas en triángulo","Con una llave de tobillo"], a:1 },
+  { type:"hard", q:"¿En qué año se celebró el primer evento UFC (UFC 1)?",
+    o:["1988","1993","1997","2001"], a:1 },
+  { type:"hard", q:"El 'heel hook' es una sumisión que ataca...",
+    o:["El codo","La rodilla/tobillo","El cuello","El hombro"], a:1 },
+  { type:"hard", q:"¿Qué peleador tiene el récord clásico de más defensas de título en peso medio de la UFC?",
+    o:["Anderson Silva","Chris Weidman","Luke Rockhold","Michael Bisping"], a:0 },
+  { type:"hard", q:"En Muay Thai tradicional, el baile ceremonial previo al combate se llama...",
+    o:["Wai Kru","Kata","Randori","Capoeira"], a:0 },
+  { type:"hard", q:"¿Qué significa que un combate termine por 'TKO'?",
+    o:["Victoria por puntos","Knockout técnico (el árbitro detiene)","Empate técnico","Descalificación"], a:1 },
+  { type:"hard", q:"La 'kimura' recibe su nombre de un judoka que venció a Hélio Gracie. ¿De qué país era?",
+    o:["Brasil","Japón","Corea","EEUU"], a:1 },
+  { type:"hard", q:"¿Quién fue el primer peleador en ostentar dos títulos de la UFC a la vez en divisiones distintas?",
+    o:["Conor McGregor","Daniel Cormier","Henry Cejudo","B.J. Penn"], a:0 },
+  { type:"hard", q:"En boxeo, un combate declarado sin ganador por igualdad de tarjetas es un...",
+    o:["No contest","Empate (draw)","TKO","Nulo por lesión"], a:1 },
+  { type:"hard", q:"¿Qué federación gestiona el judo a nivel mundial?",
+    o:["WBC","IJF","IBJJF","WKF"], a:1 },
+  { type:"hard", q:"El 'triángulo' (triangle choke) se cierra usando principalmente...",
+    o:["Los brazos","Las piernas y el cuello del rival","La espalda","Los tobillos"], a:1 },
+  { type:"hard", q:"¿Cuál de estos NO es un peso oficial de la UFC?",
+    o:["Peso paja","Peso crucero","Peso gallo","Peso pluma"], a:1 },
+  { type:"hard", q:"El 'clinch' en Muay Thai sirve sobre todo para...",
+    o:["Descansar","Controlar al rival y lanzar rodillazos","Puntuar sin tocar","Pedir tiempo"], a:1 },
+
+  // ---------- ADIVINA EL PELEADOR (silueta + pistas) ----------
+  { type:"photo", silhouette:true, q:"¿Quién es este peleador?",
+    clue:"Irlandés · peso ligero/pluma · ex doble campeón UFC · famoso por su gancho de izquierda y su bocaza.",
+    o:["Conor McGregor","Khabib Nurmagomedov","Dustin Poirier","Nate Diaz"], a:0 },
+  { type:"photo", silhouette:true, q:"¿Quién es este peleador?",
+    clue:"Ruso de Daguestán · peso ligero · retirado invicto (29-0) · maestro del grappling.",
+    o:["Islam Makhachev","Khabib Nurmagomedov","Justin Gaethje","Petr Yan"], a:1 },
+  { type:"photo", silhouette:true, q:"¿Quién es esta peleadora?",
+    clue:"Estadounidense · judoka olímpica · primera campeona femenina de la UFC.",
+    o:["Amanda Nunes","Valentina Shevchenko","Ronda Rousey","Holly Holm"], a:2 },
+  { type:"photo", silhouette:true, q:"¿Quién es este peleador?",
+    clue:"Estadounidense · semipesado/pesado · para muchos el mejor libra por libra de la historia.",
+    o:["Daniel Cormier","Jon Jones","Stipe Miocic","Francis Ngannou"], a:1 },
+  { type:"photo", silhouette:true, q:"¿Quién es este peleador?",
+    clue:"Camerunés · peso pesado · pegada récord · ex campeón UFC que pasó al boxeo.",
+    o:["Francis Ngannou","Derrick Lewis","Curtis Blaydes","Ciryl Gane"], a:0 },
+  { type:"photo", silhouette:true, q:"¿Quién es esta peleadora?",
+    clue:"Brasileña · doble campeona simultánea (gallo y pluma) · de las mejores de la historia.",
+    o:["Cris Cyborg","Amanda Nunes","Valentina Shevchenko","Zhang Weili"], a:1 },
+  { type:"photo", silhouette:true, q:"¿Quién es este peleador?",
+    clue:"Nigeriano-neozelandés · peso medio · apodado 'The Last Stylebender' · estilo de kickboxing.",
+    o:["Kamaru Usman","Israel Adesanya","Alex Pereira","Robert Whittaker"], a:1 },
+  { type:"photo", silhouette:true, q:"¿Quién es este peleador?",
+    clue:"Canadiense · wélter/medio · 'GSP' · uno de los más dominantes de la historia de la UFC.",
+    o:["Georges St-Pierre","Matt Hughes","Nick Diaz","Rory MacDonald"], a:0 },
+  { type:"photo", silhouette:true, q:"¿Quién es esta peleadora?",
+    clue:"China · peso paja · campeona de la UFC · estilo explosivo y de wushu.",
+    o:["Rose Namajunas","Zhang Weili","Joanna Jedrzejczyk","Carla Esparza"], a:1 },
+  { type:"photo", silhouette:true, q:"¿Quién es este peleador?",
+    clue:"Brasileño · leyenda del peso medio · apodado 'The Spider' · récord de defensas de título.",
+    o:["José Aldo","Anderson Silva","Lyoto Machida","Vitor Belfort"], a:1 },
 ];
 
-const QUESTIONS_PER_GAME = 12;
+/* Mezcla por tipo — como el banco es grande, 2-3 partidas salen muy distintas. */
+const QUESTIONS_PER_GAME = 14;
+const MIX = { easy:7, hard:5, photo:2 };
 
 let deck=[], idx=0, score=0, answered=false;
 const $ = id => document.getElementById(id);
@@ -162,14 +292,19 @@ function shuffle(arr){
   }
   return a;
 }
+function pickType(t,n){ return shuffle(BANK.filter(x=>x.type===t)).slice(0,n); }
 
-// Baraja preguntas Y las opciones de cada una, recalculando la respuesta correcta.
 function buildDeck(){
-  const picked = shuffle(BANK).slice(0, QUESTIONS_PER_GAME);
+  let picked = [].concat(pickType("easy",MIX.easy), pickType("hard",MIX.hard), pickType("photo",MIX.photo));
+  if(picked.length < QUESTIONS_PER_GAME){
+    const rest = shuffle(BANK.filter(x=>!picked.includes(x)));
+    picked = picked.concat(rest.slice(0, QUESTIONS_PER_GAME - picked.length));
+  }
+  picked = shuffle(picked).slice(0, QUESTIONS_PER_GAME);
   return picked.map(item=>{
     const correctText = item.o[item.a];
     const opts = shuffle(item.o);
-    return { q:item.q, o:opts, a:opts.indexOf(correctText) };
+    return Object.assign({}, item, { o:opts, a:opts.indexOf(correctText) });
   });
 }
 
@@ -188,6 +323,26 @@ function renderQuestion(){
   $("counter").textContent = `Pregunta ${idx+1} / ${deck.length}`;
   $("scoreLbl").textContent = `Aciertos: ${score}`;
   $("progress").style.width = `${(idx/deck.length)*100}%`;
+
+  const tag = $("levelTag");
+  if(item.type==="hard"){ tag.className="tag hard"; tag.textContent="Difícil"; }
+  else if(item.type==="photo"){ tag.className="tag photo"; tag.textContent="Adivina el peleador"; }
+  else { tag.className="tag easy"; tag.textContent="Fácil"; }
+
+  const media = $("media"); media.innerHTML="";
+  if(item.type==="photo"){
+    const wrap=document.createElement("div"); wrap.className="fighter";
+    if(item.photo){
+      const im=document.createElement("img"); im.src=item.photo; im.alt="Peleador"; wrap.appendChild(im);
+    }else{
+      wrap.innerHTML = fighterSVG();
+    }
+    if(item.clue){
+      const c=document.createElement("div"); c.className="clue"; c.textContent=item.clue; wrap.appendChild(c);
+    }
+    media.appendChild(wrap);
+  }
+
   $("question").textContent = item.q;
   $("feedback").textContent=""; $("feedback").className="feedback";
   $("nextBtn").style.display="none";
