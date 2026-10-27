@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quiz: Deportes de Contacto y Artes Marciales</title>
+<title>QUIZ MMA — Deportes de Contacto y Artes Marciales</title>
 <style>
   :root{
     --bg:#0f1420; --card:#1a2234; --ink:#f2f5fb; --muted:#9aa7bd;
@@ -17,13 +17,13 @@
     color:var(--ink); min-height:100vh; display:flex; align-items:center;
     justify-content:center; padding:20px;
   }
-  .app{width:100%; max-width:620px}
+  .app{width:100%; max-width:640px}
   .card{
     background:var(--card); border:1px solid var(--line); border-radius:18px;
     padding:28px; box-shadow:0 20px 50px rgba(0,0,0,.45);
   }
-  .logo{font-size:40px; text-align:center}
-  h1{text-align:center; font-size:26px; margin:8px 0 4px; letter-spacing:.5px}
+  .logo{font-size:44px; text-align:center}
+  h1{text-align:center; font-size:30px; margin:8px 0 4px; letter-spacing:1px}
   .sub{text-align:center; color:var(--muted); margin-bottom:22px; font-size:15px}
   .btn{
     width:100%; border:none; border-radius:12px; padding:15px;
@@ -67,15 +67,15 @@
     <!-- INICIO -->
     <section id="start">
       <div class="logo">🥊🥋</div>
-      <h1>QUIZ DE COMBATE</h1>
-      <p class="sub">Deportes de contacto y artes marciales. 10 preguntas. ¿Cuánto sabes?</p>
+      <h1>QUIZ MMA</h1>
+      <p class="sub">Deportes de contacto y artes marciales. Preguntas al azar cada partida.</p>
       <button class="btn" onclick="startGame()">Empezar</button>
     </section>
 
     <!-- JUEGO -->
     <section id="game" class="hidden">
       <div class="topbar">
-        <span id="counter">Pregunta 1 / 10</span>
+        <span id="counter">Pregunta 1 / 12</span>
         <span id="scoreLbl">Aciertos: 0</span>
       </div>
       <div class="bar"><i id="progress"></i></div>
@@ -88,7 +88,7 @@
     <!-- FINAL -->
     <section id="end" class="hidden">
       <div class="logo">🏆</div>
-      <div class="score-num" id="finalScore">0 / 10</div>
+      <div class="score-num" id="finalScore">0 / 12</div>
       <p class="score-msg" id="finalMsg"></p>
       <button class="btn" onclick="startGame()">Jugar otra vez</button>
     </section>
@@ -97,7 +97,8 @@
 </div>
 
 <script>
-const QUESTIONS = [
+// Banco completo de preguntas. Cada partida coge QUESTIONS_PER_GAME al azar.
+const BANK = [
   { q:"¿En qué arte marcial se usa la cinta (obi) de colores para marcar el nivel?",
     o:["Boxeo","Judo","Esgrima","Lucha libre"], a:1 },
   { q:"¿Cuántos asaltos tiene por defecto un combate de título en el boxeo profesional moderno?",
@@ -118,12 +119,62 @@ const QUESTIONS = [
     o:["Por puntos","Por descalificación","Por pin (hombros al suelo)","Por rendición"], a:2 },
   { q:"El Karate se originó en...",
     o:["Okinawa (Japón)","Brasil","Grecia","Mongolia"], a:0 },
+  { q:"¿Cómo se llama la jaula octogonal donde combate la UFC?",
+    o:["El ring","El tatami","El octágono","La lona"], a:2 },
+  { q:"Una 'llave de brazo' que hiperextiende el codo se llama...",
+    o:["Armbar","Kimura","Guillotina","Triángulo"], a:0 },
+  { q:"¿Qué significa 'K.O.'?",
+    o:["Knock Out","Keep On","Kick Only","Key Off"], a:0 },
+  { q:"El Aikido es un arte marcial de origen...",
+    o:["Coreano","Chino","Japonés","Vietnamita"], a:2 },
+  { q:"¿Qué estilo es famoso por las patadas giratorias y saltadas?",
+    o:["Judo","Taekwondo","Sumo","Boxeo"], a:1 },
+  { q:"El 'mataleón' (rear naked choke) es una...",
+    o:["Patada","Proyección","Estrangulación","Esquiva"], a:2 },
+  { q:"¿Cuántos jueces puntúan normalmente un combate de boxeo?",
+    o:["1","2","3","5"], a:2 },
+  { q:"El Sambo es un arte marcial de origen...",
+    o:["Ruso","Brasileño","Filipino","Griego"], a:0 },
+  { q:"En MMA, 'ground and pound' significa...",
+    o:["Golpear de pie","Derribar y golpear en el suelo","Correr por el ring","Bloquear patadas"], a:1 },
+  { q:"El cinturón más alto habitual en muchas artes marciales es el...",
+    o:["Blanco","Amarillo","Verde","Negro"], a:3 },
+  { q:"¿Qué peso es más ligero en el boxeo?",
+    o:["Peso pesado","Peso mosca","Peso medio","Peso wélter"], a:1 },
+  { q:"El Krav Magá es un sistema de defensa de origen...",
+    o:["Israelí","Japonés","Tailandés","Mexicano"], a:0 },
+  { q:"La 'guardia' en Jiu-Jitsu es una posición en la que luchas...",
+    o:["De pie","Desde la espalda controlando con las piernas","Corriendo","Sentado en la esquina"], a:1 },
+  { q:"¿Qué golpe de puño es un gancho corto y circular?",
+    o:["Jab","Directo","Hook (gancho)","Uppercut"], a:2 },
 ];
 
-let idx=0, score=0, answered=false;
+const QUESTIONS_PER_GAME = 12;
+
+let deck=[], idx=0, score=0, answered=false;
 const $ = id => document.getElementById(id);
 
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+// Baraja preguntas Y las opciones de cada una, recalculando la respuesta correcta.
+function buildDeck(){
+  const picked = shuffle(BANK).slice(0, QUESTIONS_PER_GAME);
+  return picked.map(item=>{
+    const correctText = item.o[item.a];
+    const opts = shuffle(item.o);
+    return { q:item.q, o:opts, a:opts.indexOf(correctText) };
+  });
+}
+
 function startGame(){
+  deck = buildDeck();
   idx=0; score=0; answered=false;
   $("start").classList.add("hidden");
   $("end").classList.add("hidden");
@@ -133,10 +184,10 @@ function startGame(){
 
 function renderQuestion(){
   answered=false;
-  const item = QUESTIONS[idx];
-  $("counter").textContent = `Pregunta ${idx+1} / ${QUESTIONS.length}`;
+  const item = deck[idx];
+  $("counter").textContent = `Pregunta ${idx+1} / ${deck.length}`;
   $("scoreLbl").textContent = `Aciertos: ${score}`;
-  $("progress").style.width = `${(idx/QUESTIONS.length)*100}%`;
+  $("progress").style.width = `${(idx/deck.length)*100}%`;
   $("question").textContent = item.q;
   $("feedback").textContent=""; $("feedback").className="feedback";
   $("nextBtn").style.display="none";
@@ -153,7 +204,7 @@ function renderQuestion(){
 function choose(i,btn){
   if(answered) return;
   answered=true;
-  const item=QUESTIONS[idx];
+  const item=deck[idx];
   const buttons=[...document.querySelectorAll(".opt")];
   buttons.forEach(b=>b.disabled=true);
   buttons[item.a].classList.add("ok");
@@ -169,23 +220,24 @@ function choose(i,btn){
   }
   $("scoreLbl").textContent=`Aciertos: ${score}`;
   $("nextBtn").style.display="block";
-  $("nextBtn").textContent = idx===QUESTIONS.length-1 ? "Ver resultado" : "Siguiente";
+  $("nextBtn").textContent = idx===deck.length-1 ? "Ver resultado" : "Siguiente";
 }
 
 function nextQuestion(){
   idx++;
-  if(idx<QUESTIONS.length){ renderQuestion(); }
+  if(idx<deck.length){ renderQuestion(); }
   else{ showEnd(); }
 }
 
 function showEnd(){
   $("game").classList.add("hidden");
   $("end").classList.remove("hidden");
-  $("finalScore").textContent=`${score} / ${QUESTIONS.length}`;
+  $("finalScore").textContent=`${score} / ${deck.length}`;
+  const pct = score/deck.length;
   let msg;
-  if(score===QUESTIONS.length) msg="¡Perfecto! Eres un maestro del tatami. 🥋";
-  else if(score>=7) msg="¡Muy bien! Tienes buena pegada. 🥊";
-  else if(score>=4) msg="No está mal, sigue entrenando. 💪";
+  if(pct===1) msg="¡Perfecto! Eres un maestro del tatami. 🥋";
+  else if(pct>=0.7) msg="¡Muy bien! Tienes buena pegada. 🥊";
+  else if(pct>=0.4) msg="No está mal, sigue entrenando. 💪";
   else msg="A seguir practicando, campeón. 🔰";
   $("finalMsg").textContent=msg;
 }
