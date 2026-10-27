@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz: Deportes de Contacto y Artes Marciales</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#1a2234; --ink:#f2f5fb; --muted:#9aa7bd;
+    --accent:#ff5a3c; --accent2:#ffb03a; --ok:#2fbf71; --bad:#e23b4e;
+    --line:#2a3550;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:system-ui,"Segoe UI",Roboto,sans-serif;
+    background:radial-gradient(1200px 600px at 50% -10%,#1d2740,var(--bg));
+    color:var(--ink); min-height:100vh; display:flex; align-items:center;
+    justify-content:center; padding:20px;
+  }
+  .app{width:100%; max-width:620px}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:18px;
+    padding:28px; box-shadow:0 20px 50px rgba(0,0,0,.45);
+  }
+  .logo{font-size:40px; text-align:center}
+  h1{text-align:center; font-size:26px; margin:8px 0 4px; letter-spacing:.5px}
+  .sub{text-align:center; color:var(--muted); margin-bottom:22px; font-size:15px}
+  .btn{
+    width:100%; border:none; border-radius:12px; padding:15px;
+    font-size:17px; font-weight:700; cursor:pointer; color:#fff;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    transition:transform .08s ease, filter .15s ease;
+  }
+  .btn:hover{filter:brightness(1.08)}
+  .btn:active{transform:scale(.98)}
+  .topbar{display:flex; justify-content:space-between; align-items:center;
+    color:var(--muted); font-size:14px; margin-bottom:14px}
+  .bar{height:8px; background:var(--line); border-radius:99px; overflow:hidden; margin-bottom:22px}
+  .bar > i{display:block; height:100%; width:0;
+    background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .3s ease}
+  .q{font-size:20px; font-weight:700; line-height:1.4; margin-bottom:20px}
+  .opts{display:grid; gap:12px}
+  .opt{
+    text-align:left; background:#121a2b; border:1px solid var(--line);
+    color:var(--ink); padding:15px 16px; border-radius:12px; font-size:16px;
+    cursor:pointer; transition:border-color .15s, background .15s;
+  }
+  .opt:hover{border-color:var(--accent2)}
+  .opt:disabled{cursor:default}
+  .opt.ok{background:rgba(47,191,113,.18); border-color:var(--ok)}
+  .opt.bad{background:rgba(226,59,78,.18); border-color:var(--bad)}
+  .feedback{min-height:24px; margin-top:16px; font-weight:600}
+  .feedback.ok{color:var(--ok)}
+  .feedback.bad{color:var(--bad)}
+  .next{margin-top:18px; display:none}
+  .score-num{font-size:52px; text-align:center; font-weight:800;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text; background-clip:text; color:transparent}
+  .score-msg{text-align:center; color:var(--muted); margin:6px 0 22px; font-size:16px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="card">
+
+    <!-- INICIO -->
+    <section id="start">
+      <div class="logo">🥊🥋</div>
+      <h1>QUIZ DE COMBATE</h1>
+      <p class="sub">Deportes de contacto y artes marciales. 10 preguntas. ¿Cuánto sabes?</p>
+      <button class="btn" onclick="startGame()">Empezar</button>
+    </section>
+
+    <!-- JUEGO -->
+    <section id="game" class="hidden">
+      <div class="topbar">
+        <span id="counter">Pregunta 1 / 10</span>
+        <span id="scoreLbl">Aciertos: 0</span>
+      </div>
+      <div class="bar"><i id="progress"></i></div>
+      <div class="q" id="question"></div>
+      <div class="opts" id="options"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="btn next" id="nextBtn" onclick="nextQuestion()">Siguiente</button>
+    </section>
+
+    <!-- FINAL -->
+    <section id="end" class="hidden">
+      <div class="logo">🏆</div>
+      <div class="score-num" id="finalScore">0 / 10</div>
+      <p class="score-msg" id="finalMsg"></p>
+      <button class="btn" onclick="startGame()">Jugar otra vez</button>
+    </section>
+
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  { q:"¿En qué arte marcial se usa la cinta (obi) de colores para marcar el nivel?",
+    o:["Boxeo","Judo","Esgrima","Lucha libre"], a:1 },
+  { q:"¿Cuántos asaltos tiene por defecto un combate de título en el boxeo profesional moderno?",
+    o:["5","10","12","15"], a:2 },
+  { q:"El Muay Thai es el arte de los '¿cuántos miembros?'",
+    o:["Dos","Cuatro","Seis","Ocho"], a:3 },
+  { q:"¿De qué país es originario el Taekwondo?",
+    o:["Japón","China","Corea","Tailandia"], a:2 },
+  { q:"En MMA, ¿qué significan las siglas UFC?",
+    o:["Ultimate Fighting Championship","United Fight Club","Universal Fight Contest","Ultra Fighter Cup"], a:0 },
+  { q:"El Brazilian Jiu-Jitsu se centra sobre todo en...",
+    o:["Patadas altas","Lucha en el suelo y sumisiones","Golpes de puño","Armas"], a:1 },
+  { q:"¿Qué prenda protege los nudillos y la muñeca en el boxeo?",
+    o:["Espinillera","Guante","Casco","Peto"], a:1 },
+  { q:"El judo fue creado por...",
+    o:["Bruce Lee","Jigoro Kano","Helio Gracie","Morihei Ueshiba"], a:1 },
+  { q:"En lucha olímpica, ¿cómo se gana por 'tocado de espaldas'?",
+    o:["Por puntos","Por descalificación","Por pin (hombros al suelo)","Por rendición"], a:2 },
+  { q:"El Karate se originó en...",
+    o:["Okinawa (Japón)","Brasil","Grecia","Mongolia"], a:0 },
+];
+
+let idx=0, score=0, answered=false;
+const $ = id => document.getElementById(id);
+
+function startGame(){
+  idx=0; score=0; answered=false;
+  $("start").classList.add("hidden");
+  $("end").classList.add("hidden");
+  $("game").classList.remove("hidden");
+  renderQuestion();
+}
+
+function renderQuestion(){
+  answered=false;
+  const item = QUESTIONS[idx];
+  $("counter").textContent = `Pregunta ${idx+1} / ${QUESTIONS.length}`;
+  $("scoreLbl").textContent = `Aciertos: ${score}`;
+  $("progress").style.width = `${(idx/QUESTIONS.length)*100}%`;
+  $("question").textContent = item.q;
+  $("feedback").textContent=""; $("feedback").className="feedback";
+  $("nextBtn").style.display="none";
+
+  const box = $("options"); box.innerHTML="";
+  item.o.forEach((text,i)=>{
+    const b=document.createElement("button");
+    b.className="opt"; b.textContent=text;
+    b.onclick=()=>choose(i,b);
+    box.appendChild(b);
+  });
+}
+
+function choose(i,btn){
+  if(answered) return;
+  answered=true;
+  const item=QUESTIONS[idx];
+  const buttons=[...document.querySelectorAll(".opt")];
+  buttons.forEach(b=>b.disabled=true);
+  buttons[item.a].classList.add("ok");
+
+  if(i===item.a){
+    score++;
+    $("feedback").textContent="¡Correcto! 👊";
+    $("feedback").className="feedback ok";
+  }else{
+    btn.classList.add("bad");
+    $("feedback").textContent=`Fallo. La respuesta era: ${item.o[item.a]}`;
+    $("feedback").className="feedback bad";
+  }
+  $("scoreLbl").textContent=`Aciertos: ${score}`;
+  $("nextBtn").style.display="block";
+  $("nextBtn").textContent = idx===QUESTIONS.length-1 ? "Ver resultado" : "Siguiente";
+}
+
+function nextQuestion(){
+  idx++;
+  if(idx<QUESTIONS.length){ renderQuestion(); }
+  else{ showEnd(); }
+}
+
+function showEnd(){
+  $("game").classList.add("hidden");
+  $("end").classList.remove("hidden");
+  $("finalScore").textContent=`${score} / ${QUESTIONS.length}`;
+  let msg;
+  if(score===QUESTIONS.length) msg="¡Perfecto! Eres un maestro del tatami. 🥋";
+  else if(score>=7) msg="¡Muy bien! Tienes buena pegada. 🥊";
+  else if(score>=4) msg="No está mal, sigue entrenando. 💪";
+  else msg="A seguir practicando, campeón. 🔰";
+  $("finalMsg").textContent=msg;
+}
+</script>
+</body>
+</html>
